@@ -26,7 +26,6 @@ public class UserMapper {
         UserEntity entity = new UserEntity();
         entity.setUsername(dto.getUsername());
         entity.setRole(dto.getRole());
-        entity.setDeleted(dto.isDeleted());
         return entity;
     }
 }

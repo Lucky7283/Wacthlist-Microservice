@@ -1,10 +1,10 @@
 package com.example.watchlist.mapper;
 
 import com.example.watchlist.dto.WatchListDto;
+import com.example.watchlist.exception.ResourceNotFoundException;
 import com.example.watchlist.entity.UserEntity;
 import com.example.watchlist.entity.WatchListEntity;
 import com.example.watchlist.repository.UserRepository;
-import com.example.watchlist.repository.WatchlistRepository;
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +33,13 @@ public class WatchListMapper {
             return null;
         }
         WatchListEntity entity = new WatchListEntity();
-        entity.setId(dto.getId());
         if (dto.getUserId() != null) {
-            entity.setUser(userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getUserId())));
+            entity.setUser(userRepository.findByIdAndIsDeletedFalse(dto.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", dto.getUserId())));
         }
         entity.setAnimeId(dto.getAnimeId());
         entity.setStatus(dto.getStatus());
         entity.setRating(dto.getRating());
-        entity.setDeleted(dto.isDeleted());
         return entity;
     }
 
@@ -50,12 +48,10 @@ public class WatchListMapper {
             return null;
         }
         WatchListEntity entity = new WatchListEntity();
-        entity.setId(dto.getId());
         entity.setUser(user);
         entity.setAnimeId(dto.getAnimeId());
         entity.setStatus(dto.getStatus());
         entity.setRating(dto.getRating());
-        entity.setDeleted(dto.isDeleted());
         return entity;
     }
 }

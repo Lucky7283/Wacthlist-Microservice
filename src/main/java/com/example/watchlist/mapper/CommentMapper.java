@@ -28,11 +28,9 @@ public class CommentMapper {
         }
 
         CommentEntity entity = new CommentEntity();
-        entity.setId(dto.getId());
         entity.setComment(dto.getComment());
         entity.setUser(user);
         entity.setAnimeId(dto.getAnimeId());
-        entity.setDeleted(dto.isDeleted());
 
         return entity;
     }

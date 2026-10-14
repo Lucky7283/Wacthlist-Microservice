@@ -23,28 +23,62 @@ public class JwtService {
     private final JwtEncoder encoder;
     private final JwtDecoder decoder;
     private final Duration ttl;
+    private final String issuer;
 
-    public JwtService(@Value("${app.jwt.signing-key}") String secret, @Value("${app.jwt.ttl}") Duration ttl) {
-        if (secret.getBytes(StandardCharsets.UTF_8).length < 32 || ttl.isNegative() || ttl.isZero())
+    public JwtService(@Value("${app.jwt.signing-key}") String secret, @Value("${app.jwt.ttl}") Duration ttl,
+            @Value("${app.jwt.issuer:Watchlist Service}") String issuer) {
+        if (secret.getBytes(StandardCharsets.UTF_8).length < 32 || ttl.isNegative() || ttl.isZero() || issuer == null || issuer.isBlank())
             throw new IllegalArgumentException("JWT configuration is invalid");
         var key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         encoder = NimbusJwtEncoder.withSecretKey(key).algorithm(MacAlgorithm.HS256).build();
         var d = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
-        d.setJwtValidator(JwtValidators.createDefaultWithIssuer("anime-azerbaycan"));
+        d.setJwtValidator(JwtValidators.createDefaultWithIssuer(issuer));
         decoder = d;
         this.ttl = ttl;
+        this.issuer = issuer;
     }
 
     public String issue(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("User ID must be positive");
+        }
         Instant now = Instant.now();
         return encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(),
-                JwtClaimsSet.builder().issuer("anime-azerbaycan").subject(userId.toString()).issuedAt(now)
+                JwtClaimsSet.builder().issuer(issuer).subject(userId.toString()).issuedAt(now)
                         .expiresAt(now.plus(ttl)).build()))
                 .getTokenValue();
     }
 
     public Long userId(String token) {
-        return Long.valueOf(decoder.decode(token).getSubject());
+        var jwt = decoder.decode(token);
+        if (jwt.getExpiresAt() == null) {
+            throw new org.springframework.security.oauth2.jwt.JwtException("Token expiration is required");
+        }
+        Long id = Long.valueOf(jwt.getSubject());
+        if (id <= 0) {
+            throw new IllegalArgumentException("Token subject must be a positive user ID");
+        }
+        return id;
+    }
+
+    public boolean matches(String token) {
+        try {
+            userId(token);
+            return true;
+        } catch (org.springframework.security.oauth2.jwt.JwtException | IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
+    public boolean matches(String token, Long expectedUserId) {
+        if (expectedUserId == null || expectedUserId <= 0) {
+            return false;
+        }
+        try {
+            return expectedUserId.equals(userId(token));
+        } catch (org.springframework.security.oauth2.jwt.JwtException | IllegalArgumentException exception) {
+            return false;
+        }
     }
 
     public Duration ttl() {
