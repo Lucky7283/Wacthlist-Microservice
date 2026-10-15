@@ -14,6 +14,12 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException.class)
+    public ProblemDetail invalidParameters(org.springframework.web.method.annotation.HandlerMethodValidationException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Invalid request parameters: IDs must be positive");
+    }
+
     @ExceptionHandler(InvalidRequestException.class)
     public ProblemDetail invalidRequest(InvalidRequestException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());

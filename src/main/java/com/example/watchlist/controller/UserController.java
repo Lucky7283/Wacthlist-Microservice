@@ -18,6 +18,7 @@ import com.example.watchlist.dto.UserDto;
 import com.example.watchlist.service.Interfaces.UserService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -36,13 +37,13 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> removeUser(@PathVariable Long id) {
+    public ResponseEntity<Void> removeUser(@PathVariable @Positive Long id) {
         userService.removeUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> changeUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<Void> changeUser(@PathVariable @Positive Long id, @Valid @RequestBody UserDto userDto) {
         userService.changeUser(id, userDto);
         return ResponseEntity.ok().build();
     }
@@ -53,7 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable @Positive Long id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

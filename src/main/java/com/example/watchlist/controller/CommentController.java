@@ -18,6 +18,7 @@ import com.example.watchlist.dto.CommentDto;
 import com.example.watchlist.service.Interfaces.CommentService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -36,38 +37,38 @@ public class CommentController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> removeComment(@PathVariable Long id) {
+    public ResponseEntity<Void> removeComment(@PathVariable @Positive Long id) {
         commentService.removeComment(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> changeComment(@PathVariable Long id, @Valid @RequestBody CommentDto commentDto) {
+    public ResponseEntity<Void> changeComment(@PathVariable @Positive Long id, @Valid @RequestBody CommentDto commentDto) {
         commentService.changeComment(id, commentDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommentDto> getCommentById(@PathVariable Long id) {
+    public ResponseEntity<CommentDto> getCommentById(@PathVariable @Positive Long id) {
         return commentService.getCommentById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/anime/{animeId}")
-    public ResponseEntity<List<CommentDto>> getCommentsByAnimeId(@PathVariable Long animeId) {
+    public ResponseEntity<List<CommentDto>> getCommentsByAnimeId(@PathVariable @Positive Long animeId) {
         return ResponseEntity.ok(commentService.getCommentsByAnimeId(animeId));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CommentDto>> getCommentsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<CommentDto>> getCommentsByUserId(@PathVariable @Positive Long userId) {
         return ResponseEntity.ok(commentService.getCommentsByUserId(userId));
     }
 
     @GetMapping("/anime/{animeId}/user/{userId}")
     public ResponseEntity<CommentDto> getCommentByAnimeIdAndUserId(
-            @PathVariable Long animeId,
-            @PathVariable Long userId) {
+            @PathVariable @Positive Long animeId,
+            @PathVariable @Positive Long userId) {
         return commentService.getCommentByAnimeIdAndUserId(animeId, userId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

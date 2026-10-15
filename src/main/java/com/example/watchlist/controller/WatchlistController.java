@@ -20,6 +20,7 @@ import com.example.watchlist.entity.WatchListStatus;
 import com.example.watchlist.service.Interfaces.WatchlistService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -38,19 +39,19 @@ public class WatchlistController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> removeWatchlist(@PathVariable Long id) {
+    public ResponseEntity<Void> removeWatchlist(@PathVariable @Positive Long id) {
         watchlistService.removeWatchlist(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> changeWatchlist(@PathVariable Long id, @Valid @RequestBody WatchListDto watchlistDto) {
+    public ResponseEntity<Void> changeWatchlist(@PathVariable @Positive Long id, @Valid @RequestBody WatchListDto watchlistDto) {
         watchlistService.changeWatchlist(id, watchlistDto);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<WatchListDto> getWatchlistById(@PathVariable Long id) {
+    public ResponseEntity<WatchListDto> getWatchlistById(@PathVariable @Positive Long id) {
         return watchlistService.getWatchlistById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -58,7 +59,7 @@ public class WatchlistController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<WatchListDto>> getWatchlistByUserId(
-            @PathVariable Long userId,
+            @PathVariable @Positive Long userId,
             @RequestParam(required = false) WatchListStatus status) {
         if (status != null) {
             return ResponseEntity.ok(watchlistService.getWatchlistByUserIdAndStatus(userId, status));
@@ -67,14 +68,14 @@ public class WatchlistController {
     }
 
     @GetMapping("/anime/{animeId}")
-    public ResponseEntity<List<WatchListDto>> getWatchlistByAnimeId(@PathVariable Long animeId) {
+    public ResponseEntity<List<WatchListDto>> getWatchlistByAnimeId(@PathVariable @Positive Long animeId) {
         return ResponseEntity.ok(watchlistService.getWatchlistByAnimeId(animeId));
     }
 
     @GetMapping("/anime/{animeId}/user/{userId}")
     public ResponseEntity<WatchListDto> getWatchlistByAnimeIdAndUserId(
-            @PathVariable Long animeId,
-            @PathVariable Long userId) {
+            @PathVariable @Positive Long animeId,
+            @PathVariable @Positive Long userId) {
         return watchlistService.getWatchlistByAnimeIdAndUserId(animeId, userId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
